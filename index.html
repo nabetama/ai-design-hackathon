@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1分間エア旅行 - 瞬間的な没入体験</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .theme-selector {
+            display: none;
+            margin: 40px auto;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+        }
+
+        .theme-selector.active {
+            display: block;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .theme-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .theme-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .theme-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .travel-experience {
+            display: none;
+            flex: 1;
+            position: relative;
+            opacity: 0;
+        }
+
+        .travel-experience.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .story-container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .story-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .story-content {
+            font-size: 1.2em;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .bg-overlay.active {
+            opacity: 0.4;
+        }
+
+        .bg-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .timer {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            display: none;
+        }
+
+        .timer.active {
+            display: block;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .start-btn {
+            font-size: 1.5em;
+            padding: 20px 50px;
+            margin-top: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .audio-controls {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: none;
+        }
+
+        .audio-controls.active {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .scene-transition {
+            animation: slideIn 1s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .theme-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .story-container { padding: 20px; }
+            .controls { display: flex; flex-direction: column; gap: 10px; }
+            .btn { margin: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>1分間エア旅行</h1>
+            <p class="subtitle">瞬間的な没入体験で、今すぐ非日常へ</p>
+            <button class="btn start-btn" onclick="showThemes()">旅を始める</button>
+        </header>
+
+        <div class="theme-selector" id="themeSelector">
+            <h2>今の気分やテーマを選んでください</h2>
+            <div class="theme-grid">
+                <div class="theme-card" onclick="startJourney('adventure')">
+                    <div class="theme-icon">🏔️</div>
+                    <div class="theme-name">冒険</div>
+                </div>
+                <div class="theme-card" onclick="startJourney('relaxation')">
+                    <div class="theme-icon">🏖️</div>
+                    <div class="theme-name">リラックス</div>
+                </div>
+                <div class="theme-card" onclick="startJourney('culture')">
+                    <div class="theme-icon">🏛️</div>
+                    <div class="theme-name">文化体験</div>
+                </div>
+                <div class="theme-card" onclick="startJourney('nature')">
+                    <div class="theme-icon">🌿</div>
+                    <div class="theme-name">自然</div>
+                </div>
+                <div class="theme-card" onclick="startJourney('urban')">
+                    <div class="theme-icon">🌃</div>
+                    <div class="theme-name">都市探索</div>
+                </div>
+                <div class="theme-card" onclick="startJourney('mystery')">
+                    <div class="theme-icon">🌌</div>
+                    <div class="theme-name">神秘</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="travel-experience" id="travelExperience">
+            <div class="story-container scene-transition">
+                <h2 class="story-title" id="storyTitle"></h2>
+                <p class="story-content" id="storyContent"></p>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="pauseJourney()" id="pauseBtn">一時停止</button>
+                <button class="btn" onclick="resetJourney()">最初から</button>
+            </div>
+        </div>
+
+        <div class="bg-overlay" id="bgOverlay">
+            <img class="bg-image" id="bgImage" src="" alt="">
+        </div>
+
+        <div class="timer" id="timer">
+            残り時間: <span id="timeLeft">60</span>秒
+        </div>
+
+        <div class="audio-controls" id="audioControls">
+            <span>BGM:</span>
+            <button class="btn" onclick="toggleMusic()" id="musicBtn">🔊</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
